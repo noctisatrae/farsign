@@ -1,0 +1,18 @@
+{
+  "name": "farsign",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "workspaces": ["packages/*"],
+  "keywords": [],
+  "author": "noctisatrae",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^2.0.22",
+    "typescript": "^5.1.3"
+  },
+  "dependencies": {
+    "@farcaster/hub-web": "^0.3.5",
+    "@noble/ed25519": "^2.0.0"
+  }
+}
