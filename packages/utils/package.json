@@ -6,11 +6,10 @@
     "description": "The code that contains the authentification logic used in the @warp-sign/hook package.",
     "type": "module",
     "scripts": {
-      "build": "tsc",
-      "dev": "npm link @warp-sign/utils && nodemon --watch src/index.ts --exec 'npm run build && npm link'"
+        "build": "tsc",
+        "dev": "npm link @farsign/utils && nodemon --watch src/index.ts --exec 'npm run build && npm link'"
     },
     "keywords": [],
     "author": "noctisatrae",
     "license": "ISC"
-  }
-  
+}

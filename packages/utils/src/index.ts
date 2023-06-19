@@ -40,28 +40,14 @@ const sendPublicKey = async (publicKey: Uint8Array, name: string): Promise<weird
     return { deepLinkUrl, token };
 }
 
-const requestSignerAuthStatus = async (token: string): Promise<boolean> => {
-    while (true) {
-        await new Promise(r => setTimeout(r, 2000));
-
-        const signerRequest = await (
+const requestSignerAuthStatus = async (token: string) => {
+    return await (
             await fetch(`https://api.warpcast.com/v2/signer-request?token=${token}`, {
                 headers: {
                 "Content-Type": "application/json"
                 }
             })
-        ).json();
-
-        console.log(signerRequest);
-
-        if (signerRequest.base64SignedMessage) {
-            console.log("signer was approved with fid: " + signerRequest.fid)
-            break;
-        }
-
-    }    
-
-    return true;
+    ).json();
 }
 
 export {
