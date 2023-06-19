@@ -50,6 +50,8 @@ const useSigner = (token: string) => {
 			}
 		}
 	})()
+
+	return [signer, setSigner]
 }
 
 export { useSigner, useToken };
