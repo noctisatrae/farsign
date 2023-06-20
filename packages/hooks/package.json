@@ -1,21 +1,22 @@
 {
-    "name": "@farsign/hooks",
-    "version": "1.0.0",
-    "main": "dist/index.js",
-    "types": "dist/index.d.ts",
-    "description": "A package to make it easy to use warp-sign with React",
-    "type": "module",
-    "scripts": {
-        "build": "tsc",
-        "dev": "nodemon --watch src/index.ts --exec 'npm run build && npm link'"
-    },
-    "keywords": [],
-    "author": "noctisatrae",
-    "license": "ISC",
-    "dependencies": {
-        "react": "^18.2.0"
-    },
-    "devDependencies": {
-        "@types/react": "^18.2.12"
-    }
+  "name": "@farsign/hooks",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "description": "A package to make it easy to use warp-sign with React",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "nodemon --watch src/index.ts --exec 'npm run build && npm link'"
+  },
+  "keywords": [],
+  "author": "noctisatrae",
+  "license": "ISC",
+  "dependencies": {
+    "react": "^18.2.0",
+    "@farsign/utils": "1.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.12"
+  }
 }
