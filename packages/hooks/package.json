@@ -11,10 +11,10 @@
   },
   "keywords": [],
   "author": "noctisatrae",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "react": "^18.2.0",
-    "@farsign/utils": "1.0.0"
+    "@farsign/utils": "1.0.1"
   },
   "devDependencies": {
     "@types/react": "^18.2.12"
