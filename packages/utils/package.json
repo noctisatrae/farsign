@@ -11,5 +11,6 @@
   },
   "keywords": [],
   "author": "noctisatrae",
-  "license": "ISC"
+  "homepage": "https://github.com/noctisatrae/farsign",
+  "license": "MIT"
 }
