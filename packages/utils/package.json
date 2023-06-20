@@ -14,6 +14,7 @@
   "homepage": "https://github.com/noctisatrae/farsign",
   "license": "MIT",
   "dependencies": {
+    "@farcaster/hub-web": "^0.3.5",
     "@noble/ed25519": "^2.0.0"
   }
 }
