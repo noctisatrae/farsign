@@ -1,5 +1,5 @@
 import * as ed from "@noble/ed25519"
-import { bytesToHexString } from "@farcaster/hub-web";
+import { bytesToHexString, hexStringToBytes } from "@farcaster/hub-web";
 
 type keyGeneration = {
   publicKey: Uint8Array,
@@ -15,6 +15,8 @@ type signerRequestResult = {
   fid: string,
   base64SignedMessage: string
 }
+
+const getPublicKeyAsync = ed.getPublicKeyAsync;
 
 const generateKeyPair = async (): Promise<keyGeneration> => {
   const privateKey = ed.utils.randomPrivateKey();
@@ -53,5 +55,8 @@ const requestSignerAuthStatus = async (token: string) => {
 export {
   generateKeyPair,
   sendPublicKey,
-  requestSignerAuthStatus
+  requestSignerAuthStatus,
+  getPublicKeyAsync,
+  bytesToHexString,
+  hexStringToBytes
 }

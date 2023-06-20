@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { generateKeyPair, requestSignerAuthStatus, sendPublicKey } from "@farsign/utils";
+import { generateKeyPair, requestSignerAuthStatus, sendPublicKey, getPublicKeyAsync, bytesToHexString, hexStringToBytes } from "@farsign/utils";
 
 type Token = {
   token: string,
@@ -17,7 +17,7 @@ type SignerData = {
 }
 
 type Signer = {
-  signer:SignerData,
+  signer: SignerData,
   isConnected: boolean
 }
 
@@ -28,14 +28,26 @@ const useToken = (clientName: string) => {
     deepLink: ""
   });
 
-  console.log(fetchedToken);
-
   useEffect(() => {
     (async () => {
-      const { publicKey } = await generateKeyPair();
-      const {token, deepLinkUrl} = await sendPublicKey(publicKey, clientName);
-      
-      setFetchedToken({ token: token, deepLink: deepLinkUrl });
+      if (localStorage.getItem("privateKey-farsign") === null) {
+        const { publicKey, privateKey } = await generateKeyPair();
+        const {token, deepLinkUrl} = await sendPublicKey(publicKey, clientName);
+        
+        localStorage.setItem("privateKey-farsign", bytesToHexString(privateKey)._unsafeUnwrap());
+
+        setFetchedToken({ token: token, deepLink: deepLinkUrl });
+      } else {
+
+        const privateKey = localStorage.getItem("privateKey-farsign");
+        
+        // console.log("GETTING FROM LOCALSTORAGE " + privateKey)
+        
+        const publicKey = await getPublicKeyAsync(hexStringToBytes(privateKey!)._unsafeUnwrap());
+        
+        const {token, deepLinkUrl} = await sendPublicKey(publicKey, clientName);
+        setFetchedToken({ token: token, deepLink: deepLinkUrl });
+      }
     })();
   }, []);
 
