@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "description": "A package to make it easy to use warp-sign with React",
+  "description": "A package to make it easy to use farsign with React",
   "type": "module",
   "scripts": {
     "build": "tsc",
