@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { generateKeyPair, requestSignerAuthStatus, sendPublicKey, getPublicKeyAsync, bytesToHexString, hexStringToBytes } from "@farsign/utils";
+import { generateKeyPair, requestSignerAuthStatus, sendPublicKey } from "@farsign/utils";
 
 type Token = {
   token: string,
@@ -26,7 +26,7 @@ const useCheckSigner = (clientName: string) => {
 
   useEffect(() => {
     (async () => {
-      if (localStorage.getItem("farsign-base64SignedMessage" + clientName) === null) 
+      if (localStorage.getItem("farsign-signer-" + clientName) === null) 
         setIsConnected(false)
       else 
         setIsConnected(true) 
@@ -69,7 +69,7 @@ const useSigner = (token: string, clientName: string) => {
   });
 
   useEffect(() => {
-    if (localStorage.getItem("farsign-base64SignedMessage" + clientName) === null) {
+    if (localStorage.getItem("farsign-signer-" + clientName) === null) {
       (async () => {
         if (token.length > 0) {
           while (true) {
@@ -79,7 +79,7 @@ const useSigner = (token: string, clientName: string) => {
     
             if (data.result && data.result.signerRequest.base64SignedMessage) {
   
-              localStorage.setItem("farsign-base64SignedMessage" + clientName, data.result.signerRequest.base64SignedMessage);
+              localStorage.setItem("farsign-signer-" + clientName, JSON.stringify(data.result));
   
               setSigner({
                 signer: data.result.signerRequest,
