@@ -50,7 +50,7 @@ const useToken = (clientName: string) => {
     })();
   }, []);
 
-  return [fetchedToken, setFetchedToken]
+  return [fetchedToken, setFetchedToken] as const
 }
 
 const useSigner = (token: string, clientName: string) => {
@@ -91,11 +91,11 @@ const useSigner = (token: string, clientName: string) => {
         }
       })()
     } else {
-
+      setSigner(JSON.parse(localStorage.getItem("farsign-signer-" + clientName)!).result);
     }
   }, [token])
 
-  return [signer, setSigner]
+  return [signer, setSigner] as const
 }
 
 export { useSigner, useToken, useCheckSigner };
