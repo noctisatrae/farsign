@@ -6,6 +6,11 @@ type Token = {
   deepLink: string
 }
 
+type Keypair = {
+  privateKey: Uint8Array,
+  publicKey: Uint8Array
+}
+
 type SignerData = {
   token: string,
   publicKey: string,
@@ -17,7 +22,7 @@ type SignerData = {
 }
 
 type Signer = {
-  signer: SignerData,
+  signerRequest: SignerData,
   isConnected: boolean
 }
 
@@ -43,10 +48,20 @@ const useToken = (clientName: string) => {
   });
 
   useEffect(() => {
-    (async () => {
+    (async () => {      
+      if (localStorage.getItem("farsign-signer-" + clientName) != null) {
+        setFetchedToken({
+          token: "already connected",
+          deepLink: "already connected"
+        })
+      } else {
         const { publicKey, privateKey } = await generateKeyPair();
         const {token, deepLinkUrl} = await sendPublicKey(publicKey, clientName);
+
+        localStorage.setItem("farsign-keypair-" + clientName, JSON.stringify({ privateKey, publicKey }))
+
         setFetchedToken({ token: token, deepLink: deepLinkUrl })
+      }
     })();
   }, []);
 
@@ -56,7 +71,7 @@ const useToken = (clientName: string) => {
 const useSigner = (token: string, clientName: string) => {
 
   const [signer, setSigner] = useState<Signer>({
-     signer: {
+     signerRequest: {
       token: "",
       publicKey: "",
       timestamp: 0,
@@ -82,7 +97,7 @@ const useSigner = (token: string, clientName: string) => {
               localStorage.setItem("farsign-signer-" + clientName, JSON.stringify(data.result));
   
               setSigner({
-                signer: data.result.signerRequest,
+                signerRequest: data.result.signerRequest,
                 isConnected: true
               });
               break
@@ -99,4 +114,4 @@ const useSigner = (token: string, clientName: string) => {
 }
 
 export { useSigner, useToken, useCheckSigner };
-export type { Token, Signer, SignerData };
+export type { Token, Signer, SignerData, Keypair };
