@@ -58,7 +58,7 @@ const useToken = (clientName: string) => {
         const { publicKey, privateKey } = await generateKeyPair();
         const {token, deepLinkUrl} = await sendPublicKey(publicKey, clientName);
 
-        localStorage.setItem("farsign-keypair-" + clientName, JSON.stringify({ privateKey, publicKey }))
+        localStorage.setItem("farsign-publicKey-" + clientName, publicKey.toString())
 
         setFetchedToken({ token: token, deepLink: deepLinkUrl })
       }
@@ -106,7 +106,7 @@ const useSigner = (token: string, clientName: string) => {
         }
       })()
     } else {
-      setSigner(JSON.parse(localStorage.getItem("farsign-signer-" + clientName)!).result);
+      setSigner((JSON.parse(localStorage.getItem("farsign-signer-" + clientName)!) as Signer));
     }
   }, [token])
 
