@@ -44,7 +44,7 @@ const useToken = (clientName: string) => {
         const { publicKey, privateKey } = await generateKeyPair();
         const {token, deepLinkUrl} = await sendPublicKey(publicKey, clientName);
 
-        localStorage.setItem("farsign-publicKey-" + clientName, publicKey.toString())
+        localStorage.setItem("farsign-privateKey-" + clientName, privateKey.toString())
 
         setFetchedToken({ token: token, deepLink: deepLinkUrl })
       }
@@ -54,7 +54,7 @@ const useToken = (clientName: string) => {
   return [fetchedToken, setFetchedToken] as const
 }
 
-const useSigner = (clientName: string, token: string) => {
+const useSigner = (clientName: string, token: Token) => {
 
   const [signer, setSigner] = useState<Signer>({
      signerRequest: {
@@ -72,11 +72,11 @@ const useSigner = (clientName: string, token: string) => {
   useEffect(() => {
     if (localStorage.getItem("farsign-signer-" + clientName) === null) {
       (async () => {
-        if (token.length > 0) {
+        if (token.token.length > 0) {
           while (true) {
             await new Promise(resolve => setTimeout(resolve, 3000));
     
-            const data = await requestSignerAuthStatus(token);
+            const data = await requestSignerAuthStatus(token.token);
     
             if (data.result && data.result.signerRequest.base64SignedMessage) {
   
