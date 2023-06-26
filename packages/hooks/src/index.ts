@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { generateKeyPair, requestSignerAuthStatus, sendPublicKey } from "@farsign/utils";
+import { NobleEd25519Signer } from "@farcaster/hub-web";
 
 type Token = {
   token: string,
@@ -24,21 +25,6 @@ type SignerData = {
 type Signer = {
   signerRequest: SignerData,
   isConnected: boolean
-}
-
-const useCheckSigner = (clientName: string) => {
-  const [isConnected, setIsConnected] = useState(false);
-
-  useEffect(() => {
-    (async () => {
-      if (localStorage.getItem("farsign-signer-" + clientName) === null) 
-        setIsConnected(false)
-      else 
-        setIsConnected(true) 
-    })();
-  }, [])
-
-  return [isConnected, setIsConnected];
 }
 
 const useToken = (clientName: string) => {
@@ -68,7 +54,7 @@ const useToken = (clientName: string) => {
   return [fetchedToken, setFetchedToken] as const
 }
 
-const useSigner = (token: string, clientName: string) => {
+const useSigner = (clientName: string, token: string) => {
 
   const [signer, setSigner] = useState<Signer>({
      signerRequest: {
@@ -113,5 +99,35 @@ const useSigner = (token: string, clientName: string) => {
   return [signer, setSigner] as const
 }
 
-export { useSigner, useToken, useCheckSigner };
+const useCheckSigner = (clientName: string) => {
+  const [isConnected, setIsConnected] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      if (localStorage.getItem("farsign-signer-" + clientName) === null) 
+        setIsConnected(false)
+      else 
+        setIsConnected(true) 
+    })();
+  }, [])
+
+  return [isConnected, setIsConnected];
+}
+
+const useEncryptedSigner = (clientName: string, token: Token) => {
+  const [encryptedSigner, setEncryptedSigner] = useState<NobleEd25519Signer>()
+
+  useEffect(() => {
+    if (token.token.length > 0) {
+      const privateKey = localStorage.getItem("farsign-privateKey-" + clientName)!;
+
+      const privateKey_encoded = Uint8Array.from(privateKey.split(",").map(split => Number(split)))
+      setEncryptedSigner(new NobleEd25519Signer(privateKey_encoded));
+    }
+  }, [token])
+
+  return [encryptedSigner, setEncryptedSigner] as const;
+}
+
+export { useSigner, useToken, useCheckSigner, useEncryptedSigner };
 export type { Token, Signer, SignerData, Keypair };
