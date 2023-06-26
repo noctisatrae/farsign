@@ -56,7 +56,7 @@ const App = () => {
 ```
 
 ## `useSigner` - This has less and less uses over time, it's more of a utility honestly.
-Basically, you still need to use it because it allows you to get the user's fid and the base64SignedMessage that allows to register in a hub.
+Basically, you still need to use it because it allows you to get the user's fid and the base64SignedMessage that allows to register in a hub. Actually, it's very useful - forget what I said.
 ```jsx
 import { useToken, useCheckSigner, useSigner } from "@farsign/hooks";
 
@@ -90,3 +90,63 @@ const App = () => {
     )
 }
 ```
+
+## `useEncryptedSigner` - The key to send message to the hub!
+> How is this different than `useSigner`: `useEncryptedSigner` does not return any useful information, it just serves the purpose to return a signer compatible with the makeCastAdd() function that allows you to publish a cast.
+
+Let's take our previous example and implement a button to cast to the hub!
+```jsx
+import { useToken, useCheckSigner, useSigner, useEncryptedSigner } from "@farsign/hooks";
+import { FarcasterNetwork, getHubRpcClient, Message, makeCastAdd, NobleEd25519Signer } from '@farcaster/hub-web';
+
+const CLIENT_NAME = "YOUR_APP_NAME";
+
+const App = () => {
+    const [isConnected, setIsConnected] = useCheckSigner(CLIENT_NAME);
+    const [token, _setToken] = useToken(CLIENT_NAME);
+    const [signer, _setSigner] = useSigner(CLIENT_NAME, token.token);
+    const [encryptedSigner, _setEncryptedSigner] = useEncryptedSigner(CLIENT_NAME, token.token);
+    
+    // useSigner allows you to know when the user accepted the sign-in request so you can set the isConnected variable 
+    // for your UI to react accordingly to the changes!
+    useEffect(() => {
+        if (signer.isConnected === true) {
+            setIsConnected(true); // if Typescript is naughty with you, you can write this: (setIsConnected as Dispatch<SetStateAction<boolean>>)(true);
+        }
+    }, [signer])
+    
+    return (
+        <>
+            {/* If the user is not connected we show the sign-in link, if they are, we show a CAPS-LOCK message */}
+            {(isConnected === false) ? 
+                (token.token === "") ? 
+                    <a href={token.deepLink}>Sign-in with Farcaster</a> 
+                    : 
+                    <p>Waiting for the token to load</p>
+                : 
+                <button onClick={() => {
+                    // This localStorage data was registered by useSigner!
+                    const request: SignerData = JSON.parse(localStorage.getItem("farsign-signer-" + CLIENT_NAME)!).signerRequest;
+                    const client = getHubRpcClient("https://galaxy.ditti.xyz:2285"); // awesome hub 
+
+                    const castBody = "Hey! Did you hear about this incredible package @farsign/hooks? The one that allows you to easily implement sign-in with Farcaster!"
+
+                    const cast = (await makeCastAdd({
+                        text: castBody,
+                        embeds: [],
+                        embedsDeprecated: [],
+                        mentions: [],
+                        mentionsPositions: [],
+                    }, { fid: request.fid, network: FarcasterNetwork.MAINNET }, (encryptedSigner as NobleEd25519Signer) ))._unsafeUnwrap();
+
+                    // I don't know why it creates an error, this is not due to @farsign/hooks...
+                    // @ts-expect-error
+                    client.submitMessage(cast);
+                }}>Send a cast to show your joy!</button>
+            }
+        </>
+    )
+}
+```
+
+Woaah! You really implemented sign-in with Farcaster and casting from your app as easily as that? 
