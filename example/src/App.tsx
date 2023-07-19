@@ -7,7 +7,7 @@ import { useEffect } from 'react';
 const CLIENT_NAME = "Example"
 
 const sendCast = async (encryptedSigner: NobleEd25519Signer) => {
-  const castBody = "Wow! Another test from @farsign/hooks - the example folder is getting better and better guys!";
+  const castBody = "I finally fixed galaxy.ditty.xyz with a lot of help from Alex! It was really hard but we made it... and now, I can use @farsign/hooks to send this message ;)";
   const hub = getHubRpcClient("https://galaxy.ditti.xyz:2285");
   
   const request = JSON.parse(localStorage.getItem("farsign-signer-" + CLIENT_NAME)!).signerRequest;
