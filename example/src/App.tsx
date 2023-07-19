@@ -1,6 +1,6 @@
 import './App.css'
 import { useCheckSigner, useToken, useSigner, useEncryptedSigner } from "@farsign/hooks";
-import { makeCastAdd, getHubRpcClient, FarcasterNetwork, Message, NobleEd25519Signer } from "@farcaster/hub-web";
+import { makeCastAdd, getHubRpcClient, FarcasterNetwork, NobleEd25519Signer } from "@farcaster/hub-web";
 import QRCode from "react-qr-code";
 import { useEffect } from 'react';
 

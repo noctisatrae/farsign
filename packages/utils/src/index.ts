@@ -11,10 +11,10 @@ type weirdResult = {
   deepLinkUrl: string
 }
 
-type signerRequestResult = {
-  fid: string,
-  base64SignedMessage: string
-}
+// type signerRequestResult = {
+//   fid: string,
+//   base64SignedMessage: string
+// }
 
 const getPublicKeyAsync = ed.getPublicKeyAsync;
 
