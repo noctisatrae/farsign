@@ -27,9 +27,9 @@ const generateKeyPair = async (): Promise<keyGeneration> => {
 // extract key from keygen
 const sendPublicKey = async (publicKey: Uint8Array, name: string): Promise<weirdResult> => {
     
-  let convertedKey = bytesToHexString(publicKey)._unsafeUnwrap();
+  const convertedKey = bytesToHexString(publicKey)._unsafeUnwrap();
     
-  let response = await fetch("https://api.warpcast.com/v2/signer-requests", {
+  const response = await fetch("https://api.warpcast.com/v2/signer-requests", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -37,7 +37,7 @@ const sendPublicKey = async (publicKey: Uint8Array, name: string): Promise<weird
       body: JSON.stringify({ publicKey: convertedKey, name: name }),
   });
 
-  let {deepLinkUrl, token}: weirdResult = (await response.json()).result;
+  const {deepLinkUrl, token}: weirdResult = (await response.json()).result;
 
   return { deepLinkUrl, token };
 }
