@@ -71,7 +71,7 @@ const App = () => {
     // for your UI to react accordingly to the changes!
     useEffect(() => {
         if (signer.isConnected === true) {
-            setIsConnected(true); // if Typescript is naughty with you, you can write this: (setIsConnected as Dispatch<SetStateAction<boolean>>)(true);
+            setIsConnected(true);
         }
     }, [signer])
     
@@ -111,7 +111,7 @@ const App = () => {
     // for your UI to react accordingly to the changes!
     useEffect(() => {
         if (signer.isConnected === true) {
-            setIsConnected(true); // if Typescript is naughty with you, you can write this: (setIsConnected as Dispatch<SetStateAction<boolean>>)(true);
+            setIsConnected(true);
         }
     }, [signer])
     

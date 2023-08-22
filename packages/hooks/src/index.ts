@@ -111,7 +111,7 @@ const useCheckSigner = (clientName: string) => {
     })();
   }, [])
 
-  return [isConnected, setIsConnected];
+  return [isConnected, setIsConnected] as const;
 }
 
 const useEncryptedSigner = (clientName: string, token: Token) => {
