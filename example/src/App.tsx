@@ -20,22 +20,20 @@ const sendCast = async (encryptedSigner: NobleEd25519Signer) => {
     mentionsPositions: [],
   }, { fid: request.fid, network: FarcasterNetwork.MAINNET }, (encryptedSigner as NobleEd25519Signer) ))._unsafeUnwrap();
 
-  // @ts-expect-error
   hub.submitMessage(cast);
 }
 
 function App() {
   const [isConnected, setIsConnected] = useCheckSigner(CLIENT_NAME);
-  const [token] = useToken(CLIENT_NAME);
+  const [token] = useToken(CLIENT_NAME, 10626, "legal winner thank year wave sausage worth useful legal winner thank yellow");
   const [signer] = useSigner(CLIENT_NAME, token);
   const [encryptedSigner] = useEncryptedSigner(CLIENT_NAME, token);
-  
+
   useEffect(() => {
-    if (signer.isConnected === true) {
+    if (signer?.isConnected === true) {
       setIsConnected(true);
     }
   }, [signer])
-    
   
   return (
     <>
@@ -48,6 +46,7 @@ function App() {
           :
           <>
             <div className="card">
+              {/* @ts-expect-error*/}
               <button onClick={() => sendCast(encryptedSigner)}>Send cast to express your joy!</button>
             </div>
           </>

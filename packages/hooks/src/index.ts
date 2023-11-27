@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
-import { generateKeyPair, generateSignedKeyRequestSignature, requestSignerAuthStatus, sendPublicKey } from "@farsign/utils";
+import { generateKeyPair, requestSignerAuthStatus, sendPublicKey } from "@farsign/utils";
 import { NobleEd25519Signer } from "@farcaster/hub-web";
+
+import { SignerAuthStatus } from "./SignerAuthStatus";
 
 type Token = {
   token: string,
@@ -12,18 +14,8 @@ type Keypair = {
   publicKey: Uint8Array
 }
 
-type SignerData = {
-  token: string,
-  publicKey: string,
-  timestamp: number,
-  name: string,
-  fid: number,
-  messageHash: string,
-  base64SignedMessage: string
-}
-
 type Signer = {
-  signerRequest: SignerData,
+  signerRequest: SignerAuthStatus,
   isConnected: boolean
 }
 
@@ -42,11 +34,11 @@ const useToken = (clientName: string, fid: number, appMnemonic: string) => {
         })
       } else {
         const keys = await generateKeyPair();
-        const {token, deepLinkUrl} = await sendPublicKey(keys, clientName, fid, appMnemonic);
+        const {token, deeplinkUrl} = await sendPublicKey(keys, clientName, fid, appMnemonic);
 
         localStorage.setItem("farsign-privateKey-" + clientName, keys.privateKey.toString())
 
-        setFetchedToken({ token: token, deepLink: deepLinkUrl })
+        setFetchedToken({ token: token, deepLink: deeplinkUrl })
       }
     })();
   }, []);
@@ -56,18 +48,7 @@ const useToken = (clientName: string, fid: number, appMnemonic: string) => {
 
 const useSigner = (clientName: string, token: Token) => {
 
-  const [signer, setSigner] = useState<Signer>({
-     signerRequest: {
-      token: "",
-      publicKey: "",
-      timestamp: 0,
-      name: "",
-      fid: 0,
-      messageHash: "",
-      base64SignedMessage: ""
-     },
-     isConnected: false
-  });
+  const [signer, setSigner] = useState<Signer>();
 
   useEffect(() => {
     if (localStorage.getItem("farsign-signer-" + clientName) === null) {
@@ -76,14 +57,15 @@ const useSigner = (clientName: string, token: Token) => {
           while (true) {
             await new Promise(resolve => setTimeout(resolve, 3000));
     
-            const data = await requestSignerAuthStatus(token.token);
-    
-            if (data.result && data.result.signerRequest.base64SignedMessage) {
+            const data: SignerAuthStatus = await requestSignerAuthStatus(token.token);
+            console.log(data.signedKeyRequest.state);
+
+            if (data.signedKeyRequest && data.signedKeyRequest.state == "completed") {
   
-              localStorage.setItem("farsign-signer-" + clientName, JSON.stringify(data.result));
+              localStorage.setItem("farsign-signer-" + clientName, JSON.stringify(data.signedKeyRequest));
   
               setSigner({
-                signerRequest: data.result.signerRequest,
+                signerRequest: data,
                 isConnected: true
               });
               break
@@ -130,4 +112,4 @@ const useEncryptedSigner = (clientName: string, token: Token) => {
 }
 
 export { useSigner, useToken, useCheckSigner, useEncryptedSigner };
-export type { Token, Signer, SignerData, Keypair };
+export type { Token, Signer, Keypair };

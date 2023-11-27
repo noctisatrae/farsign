@@ -1,6 +1,7 @@
 import * as ed from "@noble/ed25519";
 import { mnemonicToAccount, signTypedData } from "viem/accounts";
 import { bytesToHexString, hexStringToBytes } from "@farcaster/hub-web";
+import {Buffer} from "buffer";
 
 import * as contracts from "./contracts";
 
@@ -10,9 +11,25 @@ type keyGeneration = {
   key: string
 }
 
-type weirdResult = {
-  token: string,
-  deepLinkUrl: string
+type deepLinkResult = {
+  deeplinkUrl: string,
+  token: string
+}
+
+export interface weirdResult {
+  result: Result
+}
+
+export interface Result {
+  signedKeyRequest: SignedKeyRequest
+}
+
+export interface SignedKeyRequest {
+  token: string
+  deeplinkUrl: string
+  key: string
+  requestFid: number
+  state: string
 }
 
 // type signerRequestResult = {
@@ -29,7 +46,7 @@ const generateKeyPair = async (): Promise<keyGeneration> => {
   return { publicKey, privateKey, key };
 }
 
-const generateSignedKeyRequestSignature = async (appFid: number, appMnemonic: string, key: `0x${string}`) => {
+const generateSignedKeyRequestSignature = async (appFid: number, appMnemonic: string, key: string) => {
   const account = mnemonicToAccount(appMnemonic);
   const deadline = Math.floor(Date.now() / 1000) + 86400; // signature is valid for 1 day
   
@@ -41,6 +58,7 @@ const generateSignedKeyRequestSignature = async (appFid: number, appMnemonic: st
     primaryType: "SignedKeyRequest",
     message: {
       requestFid: BigInt(appFid),
+      // @ts-expect-error
       key,
       deadline: BigInt(deadline),
     },
@@ -48,10 +66,15 @@ const generateSignedKeyRequestSignature = async (appFid: number, appMnemonic: st
 }
 
 // extract key from keygen
-const sendPublicKey = async (keys: keyGeneration, name: string, fid: number, appMnemonic: string): Promise<weirdResult> => {
+const sendPublicKey = async (keys: keyGeneration, name: string, fid: number, appMnemonic: string): Promise<deepLinkResult> => {
     
   const convertedKey = bytesToHexString(keys.publicKey)._unsafeUnwrap();
-  const signature = generateSignedKeyRequestSignature(fid, appMnemonic, `0x${keys.key}`);
+  const signature = await generateSignedKeyRequestSignature(fid, appMnemonic, keys.key);
+  const deadline = Math.floor(Date.now() / 1000) + 86400; // signature is valid for 1 day
+
+  console.table([keys, name, fid, appMnemonic]);
+  console.log(signature);
+  console.log(convertedKey)
 
 
   const response = await fetch("https://api.warpcast.com/v2/signed-key-requests", {
@@ -59,16 +82,18 @@ const sendPublicKey = async (keys: keyGeneration, name: string, fid: number, app
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ publicKey: convertedKey, 
-        name: name, 
-        fid: fid, 
-        signature:signature 
+      body: JSON.stringify({ 
+        key: convertedKey, //key 
+        name: name,
+        requestFid: fid, 
+        deadline: deadline,
+        signature: signature 
     }),
   });
+  
+  const {deeplinkUrl, token} = (await response.json() as weirdResult).result.signedKeyRequest;
 
-  const {deepLinkUrl, token}: weirdResult = (await response.json()).result;
-
-  return { deepLinkUrl, token };
+  return { deeplinkUrl, token };
 }
 
 const requestSignerAuthStatus = async (token: string) => {

@@ -16,6 +16,7 @@
   "dependencies": {
     "@farcaster/hub-web": "^0.3.5",
     "@noble/ed25519": "^2.0.0",
+    "buffer": "^6.0.3",
     "viem": "^1.9.5"
   }
 }
