@@ -10,7 +10,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@farsign/hooks": "1.2.1",
     "@farcaster/hub-web": "^0.3.6",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { generateKeyPair, requestSignerAuthStatus, sendPublicKey } from "@farsign/utils";
+import { generateKeyPair, generateSignedKeyRequestSignature, requestSignerAuthStatus, sendPublicKey } from "@farsign/utils";
 import { NobleEd25519Signer } from "@farcaster/hub-web";
 
 type Token = {
@@ -27,7 +27,7 @@ type Signer = {
   isConnected: boolean
 }
 
-const useToken = (clientName: string) => {
+const useToken = (clientName: string, fid: number, appMnemonic: string) => {
   const [fetchedToken, setFetchedToken] = useState<Token>({
     token: "",
     deepLink: ""
@@ -41,10 +41,10 @@ const useToken = (clientName: string) => {
           deepLink: "already connected"
         })
       } else {
-        const { publicKey, privateKey } = await generateKeyPair();
-        const {token, deepLinkUrl} = await sendPublicKey(publicKey, clientName);
+        const keys = await generateKeyPair();
+        const {token, deepLinkUrl} = await sendPublicKey(keys, clientName, fid, appMnemonic);
 
-        localStorage.setItem("farsign-privateKey-" + clientName, privateKey.toString())
+        localStorage.setItem("farsign-privateKey-" + clientName, keys.privateKey.toString())
 
         setFetchedToken({ token: token, deepLink: deepLinkUrl })
       }
