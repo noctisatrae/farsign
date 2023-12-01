@@ -1,6 +1,6 @@
 {
   "name": "@farsign/hooks",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "description": "A package to make it easy to use @farsign/utils with React",
@@ -13,7 +13,7 @@
   "author": "noctisatrae",
   "license": "MIT",
   "dependencies": {
-    "@farsign/utils": "^2.0.0",
+    "@farsign/utils": "^2.1.0",
     "react": "^18.2.0"
   },
   "devDependencies": {
