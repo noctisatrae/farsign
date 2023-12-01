@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { generateKeyPair, requestSignerAuthStatus, sendPublicKey } from "@farsign/utils";
+import { generateKeyPair, requestSignerAuthStatus, sendPublicKey, keyGeneration } from "@farsign/utils";
 import { NobleEd25519Signer } from "@farcaster/hub-web";
 import { SignedKeyRequest } from "./SignerAuthStatus";
 
@@ -17,7 +17,7 @@ type Signer = {
   signerRequest: SignedKeyRequest|boolean,
 }
 
-const useToken = (clientName: string, fid: number, appMnemonic: string) => {
+const useToken = (clientName: string, fid: number, appMnemonic: string, keys: keyGeneration) => {
   const [fetchedToken, setFetchedToken] = useState<Token>({
     token: "",
     deepLink: ""
@@ -31,7 +31,6 @@ const useToken = (clientName: string, fid: number, appMnemonic: string) => {
           deepLink: "already connected"
         })
       } else {
-        const keys = await generateKeyPair();
         const {token, deeplinkUrl} = await sendPublicKey(keys, clientName, fid, appMnemonic);
 
         localStorage.setItem("farsign-privateKey-" + clientName, keys.privateKey.toString())
@@ -57,8 +56,7 @@ const useSigner = (clientName: string, token: Token) => {
     (async () => {
       const isAlreadyConnectedCheck = isAlreadyConnected(clientName);
       console.log(token, isAlreadyConnectedCheck)
-      if (token.token.length > 0 && typeof isAlreadyConnectedCheck == 'object') {
-        const isConnectedRequest = isAlreadyConnected(clientName);
+      if (token.token.length > 0 && typeof isAlreadyConnectedCheck == 'boolean') {
         while (true) {
           await new Promise(resolve => setTimeout(resolve, 4000));
 
@@ -114,5 +112,5 @@ const useEncryptedSigner = (clientName: string) => {
   return [encryptedSigner, setEncryptedSigner] as const;
 }
 
-export { useSigner, useToken, useCheckSigner, useEncryptedSigner, SignedKeyRequest };
+export { useSigner, useToken, useCheckSigner, useEncryptedSigner, SignedKeyRequest, generateKeyPair, keyGeneration };
 export type { Token, Signer, Keypair };

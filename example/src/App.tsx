@@ -1,13 +1,19 @@
 import './App.css'
-import { useCheckSigner, useToken, useSigner, useEncryptedSigner } from "@farsign/hooks";
+import { useCheckSigner, useToken, useSigner, useEncryptedSigner, keyGeneration } from "@farsign/hooks";
 import { makeCastAdd, getHubRpcClient, FarcasterNetwork } from "@farcaster/hub-web";
 import QRCode from "react-qr-code";
 import { useEffect } from 'react';
 
 const CLIENT_NAME = "Example"
+const keys: keyGeneration = {
+  publicKey: "" 
+  privateKey: ""
+  key: ""
+}
+const mnemonic = "";
 
 const sendCast = async (encryptedSigner: any) => {
-  const castBody = "Is it working now?";
+  const castBody = ":) !";
   const hub = getHubRpcClient("https://834f9d.hubs-web.neynar.com:2285");
   
   const request = JSON.parse(localStorage.getItem("farsign-" + CLIENT_NAME)!);
@@ -25,7 +31,7 @@ const sendCast = async (encryptedSigner: any) => {
 
 function App() {
   const [isConnected, setIsConnected] = useCheckSigner(CLIENT_NAME);
-  const [token] = useToken(CLIENT_NAME, 10626, "reduce fancy mail reunion patrol horn assist leopard youth erupt ethics aspect suggest hint pulse current buyer then this inch drastic sell antique little");
+  const [token] = useToken(CLIENT_NAME, 10626, mnemonic, keys);
   const [signer] = useSigner(CLIENT_NAME, token);
   const [encryptedSigner] = useEncryptedSigner(CLIENT_NAME);
 

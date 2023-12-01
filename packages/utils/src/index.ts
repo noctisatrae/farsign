@@ -109,5 +109,6 @@ export {
   getPublicKeyAsync,
   bytesToHexString,
   hexStringToBytes,
-  SignedKeyRequest
+  SignedKeyRequest,
+  keyGeneration
 }
