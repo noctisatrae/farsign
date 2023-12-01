@@ -1,5 +1,5 @@
 import * as ed from "@noble/ed25519";
-import { mnemonicToAccount, signTypedData } from "viem/accounts";
+import { mnemonicToAccount } from "viem/accounts";
 import { bytesToHexString, hexStringToBytes } from "@farcaster/hub-web";
 import {Buffer} from "buffer";
 
@@ -24,7 +24,7 @@ export interface Result {
   signedKeyRequest: SignedKeyRequest
 }
 
-export interface SignedKeyRequest {
+interface SignedKeyRequest {
   token: string
   deeplinkUrl: string
   key: string
@@ -48,7 +48,7 @@ const generateKeyPair = async (): Promise<keyGeneration> => {
 
 const generateSignedKeyRequestSignature = async (appFid: number, appMnemonic: string, key: string) => {
   const account = mnemonicToAccount(appMnemonic);
-  const deadline = Math.floor(Date.now() / 1000) + 86400; // signature is valid for 1 day
+  const deadline = Math.floor(Date.now() / 1000) + 86400;// signature is valid for 1 day
   
   return await account.signTypedData({
     domain: contracts.SIGNED_KEY_REQUEST_VALIDATOR_EIP_712_DOMAIN,
@@ -71,11 +71,6 @@ const sendPublicKey = async (keys: keyGeneration, name: string, fid: number, app
   const convertedKey = bytesToHexString(keys.publicKey)._unsafeUnwrap();
   const signature = await generateSignedKeyRequestSignature(fid, appMnemonic, keys.key);
   const deadline = Math.floor(Date.now() / 1000) + 86400; // signature is valid for 1 day
-
-  console.table([keys, name, fid, appMnemonic]);
-  console.log(signature);
-  console.log(convertedKey)
-
 
   const response = await fetch("https://api.warpcast.com/v2/signed-key-requests", {
       method: "POST",
@@ -113,5 +108,6 @@ export {
   requestSignerAuthStatus,
   getPublicKeyAsync,
   bytesToHexString,
-  hexStringToBytes
+  hexStringToBytes,
+  SignedKeyRequest
 }

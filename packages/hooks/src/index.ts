@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { generateKeyPair, requestSignerAuthStatus, sendPublicKey } from "@farsign/utils";
 import { NobleEd25519Signer } from "@farcaster/hub-web";
-
 import { SignedKeyRequest } from "./SignerAuthStatus";
 
 type Token = {
@@ -15,8 +14,7 @@ type Keypair = {
 }
 
 type Signer = {
-  signerRequest: SignedKeyRequest,
-  isConnected: boolean
+  signerRequest: SignedKeyRequest|boolean,
 }
 
 const useToken = (clientName: string, fid: number, appMnemonic: string) => {
@@ -47,45 +45,38 @@ const useToken = (clientName: string, fid: number, appMnemonic: string) => {
 }
 
 const isAlreadyConnected = (clientName: string) => {
-  const fetchHistory = localStorage.getItem(`farsign-${clientName}`);
-
-  if (fetchHistory === null) {
-    return false
-  } else {
-    return JSON.parse(fetchHistory);
-  }
+  const fetchSignerLocalStorage = localStorage.getItem(`farsign-${clientName}`);
+  return (fetchSignerLocalStorage === null) ? false : fetchSignerLocalStorage 
 }
 
 const useSigner = (clientName: string, token: Token) => {
 
   const [signer, setSigner] = useState<Signer>();
 
-  console.log("token " + token.token)
-
   useEffect(() => {
     (async () => {
-      if (token.token.length > 0) {
+      const isAlreadyConnectedCheck = isAlreadyConnected(clientName);
+      console.log(token, isAlreadyConnectedCheck)
+      if (token.token.length > 0 && typeof isAlreadyConnectedCheck == 'object') {
         const isConnectedRequest = isAlreadyConnected(clientName);
-        if (!isConnectedRequest) {
-          while (true) {
-            await new Promise(resolve => setTimeout(resolve, 4000));
-      
-            const {result} = await requestSignerAuthStatus(token.token as `Ox${string}`);
-            const res: SignedKeyRequest = result.signedKeyRequest;
+        while (true) {
+          await new Promise(resolve => setTimeout(resolve, 4000));
+
+          const {result} = await requestSignerAuthStatus(token.token as `Ox${string}`);
+          const res: SignedKeyRequest = result.signedKeyRequest;
   
-            if (res.state == "completed") { 
-              setSigner({
-                isConnected: true,
-                signerRequest: res
-              });
-  
-              localStorage.setItem(`farsign-${clientName}`, JSON.stringify(res));
-              break
-            }
+          if (res.state == "completed") { 
+            setSigner({
+              signerRequest: res
+            });
+
+            localStorage.setItem(`farsign-${clientName}`, JSON.stringify(res));
+            break
           }
-        } else {
-          setSigner({isConnected: true, signerRequest: isConnectedRequest })
         }
+      } else {
+        const fetchedSigner = JSON.parse(isAlreadyConnectedCheck as string)
+        setSigner({signerRequest: fetchedSigner })
       }
     })()
   }, [token])
@@ -108,20 +99,20 @@ const useCheckSigner = (clientName: string) => {
   return [isConnected, setIsConnected] as const;
 }
 
-const useEncryptedSigner = (clientName: string, token: Token) => {
+const useEncryptedSigner = (clientName: string) => {
   const [encryptedSigner, setEncryptedSigner] = useState<NobleEd25519Signer>()
 
   useEffect(() => {
-    if (token.token.length > 0) {
+    if (localStorage.getItem(`farsign-${clientName}`) != null) {
       const privateKey = localStorage.getItem("farsign-privateKey-" + clientName)!;
 
       const privateKey_encoded = Uint8Array.from(privateKey.split(",").map(split => Number(split)))
       setEncryptedSigner(new NobleEd25519Signer(privateKey_encoded));
     }
-  }, [token])
+  }, [])
 
   return [encryptedSigner, setEncryptedSigner] as const;
 }
 
-export { useSigner, useToken, useCheckSigner, useEncryptedSigner };
+export { useSigner, useToken, useCheckSigner, useEncryptedSigner, SignedKeyRequest };
 export type { Token, Signer, Keypair };
