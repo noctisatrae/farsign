@@ -7,10 +7,10 @@ import { useEffect } from 'react';
 const CLIENT_NAME = "Example"
 
 const sendCast = async (encryptedSigner: NobleEd25519Signer) => {
-  const castBody = "I finally fixed galaxy.ditty.xyz with a lot of help from Alex! It was really hard but we made it... and now, I can use @farsign/hooks to send this message ;)";
-  const hub = getHubRpcClient("https://galaxy.ditti.xyz:2285");
+  const castBody = "farsign is baaack :) !";
+  const hub = getHubRpcClient("https://834f9d.hubs-web.neynar.com:2285");
   
-  const request = JSON.parse(localStorage.getItem("farsign-signer-" + CLIENT_NAME)!).signerRequest;
+  const request = JSON.parse(localStorage.getItem("farsign-" + CLIENT_NAME)!);
   
   const cast = (await makeCastAdd({
     text: castBody,
@@ -18,16 +18,18 @@ const sendCast = async (encryptedSigner: NobleEd25519Signer) => {
     embedsDeprecated: [],
     mentions: [],
     mentionsPositions: [],
-  }, { fid: request.fid, network: FarcasterNetwork.MAINNET }, (encryptedSigner as NobleEd25519Signer) ))._unsafeUnwrap();
+  }, { fid: request.userFid, network: FarcasterNetwork.MAINNET }, (encryptedSigner as NobleEd25519Signer) ))._unsafeUnwrap();
 
   hub.submitMessage(cast);
 }
 
 function App() {
   const [isConnected, setIsConnected] = useCheckSigner(CLIENT_NAME);
-  const [token] = useToken(CLIENT_NAME, 10626, "legal winner thank year wave sausage worth useful legal winner thank yellow");
+  const [token] = useToken(CLIENT_NAME, 10626, "reduce fancy mail reunion patrol horn assist leopard youth erupt ethics aspect suggest hint pulse current buyer then this inch drastic sell antique little");
   const [signer] = useSigner(CLIENT_NAME, token);
   const [encryptedSigner] = useEncryptedSigner(CLIENT_NAME, token);
+
+  console.log(token)
 
   useEffect(() => {
     if (signer?.isConnected === true) {
@@ -46,8 +48,8 @@ function App() {
           :
           <>
             <div className="card">
-              {/* @ts-expect-error*/}
-              <button onClick={() => sendCast(encryptedSigner)}>Send cast to express your joy!</button>
+              {/* @ts-expect-error */}
+              <button onClick={() => sendCast(encryptedSigner!)}>Send cast!</button>
             </div>
           </>
         }

@@ -96,9 +96,9 @@ const sendPublicKey = async (keys: keyGeneration, name: string, fid: number, app
   return { deeplinkUrl, token };
 }
 
-const requestSignerAuthStatus = async (token: string) => {
+const requestSignerAuthStatus = async (token: `Ox${string}`) => {
   return await (
-    await fetch(`https://api.warpcast.com/v2/signed-key-request?token=${token}`, {
+    await fetch(`https://api.warpcast.com/v2/signed-key-request?token=` + token, {
       headers: {
         "Content-Type": "application/json"
       }

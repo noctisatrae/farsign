@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { generateKeyPair, requestSignerAuthStatus, sendPublicKey } from "@farsign/utils";
 import { NobleEd25519Signer } from "@farcaster/hub-web";
 
-import { SignerAuthStatus } from "./SignerAuthStatus";
+import { SignedKeyRequest } from "./SignerAuthStatus";
 
 type Token = {
   token: string,
@@ -15,7 +15,7 @@ type Keypair = {
 }
 
 type Signer = {
-  signerRequest: SignerAuthStatus,
+  signerRequest: SignedKeyRequest,
   isConnected: boolean
 }
 
@@ -46,36 +46,48 @@ const useToken = (clientName: string, fid: number, appMnemonic: string) => {
   return [fetchedToken, setFetchedToken] as const
 }
 
+const isAlreadyConnected = (clientName: string) => {
+  const fetchHistory = localStorage.getItem(`farsign-${clientName}`);
+
+  if (fetchHistory === null) {
+    return false
+  } else {
+    return JSON.parse(fetchHistory);
+  }
+}
+
 const useSigner = (clientName: string, token: Token) => {
 
   const [signer, setSigner] = useState<Signer>();
 
-  useEffect(() => {
-    if (localStorage.getItem("farsign-signer-" + clientName) === null) {
-      (async () => {
-        if (token.token.length > 0) {
-          while (true) {
-            await new Promise(resolve => setTimeout(resolve, 3000));
-    
-            const data: SignerAuthStatus = await requestSignerAuthStatus(token.token);
-            console.log(data.signedKeyRequest.state);
+  console.log("token " + token.token)
 
-            if (data.signedKeyRequest && data.signedKeyRequest.state == "completed") {
+  useEffect(() => {
+    (async () => {
+      if (token.token.length > 0) {
+        const isConnectedRequest = isAlreadyConnected(clientName);
+        if (!isConnectedRequest) {
+          while (true) {
+            await new Promise(resolve => setTimeout(resolve, 4000));
+      
+            const {result} = await requestSignerAuthStatus(token.token as `Ox${string}`);
+            const res: SignedKeyRequest = result.signedKeyRequest;
   
-              localStorage.setItem("farsign-signer-" + clientName, JSON.stringify(data.signedKeyRequest));
-  
+            if (res.state == "completed") { 
               setSigner({
-                signerRequest: data,
-                isConnected: true
+                isConnected: true,
+                signerRequest: res
               });
+  
+              localStorage.setItem(`farsign-${clientName}`, JSON.stringify(res));
               break
             }
           }
+        } else {
+          setSigner({isConnected: true, signerRequest: isConnectedRequest })
         }
-      })()
-    } else {
-      setSigner((JSON.parse(localStorage.getItem("farsign-signer-" + clientName)!) as Signer));
-    }
+      }
+    })()
   }, [token])
 
   return [signer, setSigner] as const
