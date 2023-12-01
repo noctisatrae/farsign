@@ -6,8 +6,8 @@ import { useEffect } from 'react';
 
 const CLIENT_NAME = "Example"
 const keys: keyGeneration = {
-  publicKey: "" 
-  privateKey: ""
+  publicKey: [], //UINT8ARRAY
+  privateKey: [],
   key: ""
 }
 const mnemonic = "";
