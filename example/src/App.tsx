@@ -57,6 +57,7 @@ function App() {
           :
           <>
             <div className="card">
+              <p>{}</p>
               <button onClick={() => sendCast(encryptedSigner)}>Send cast!</button>
             </div>
           </>

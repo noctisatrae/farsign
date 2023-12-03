@@ -26,7 +26,6 @@ const useKeypair = (clientName: string) => {
     (async () => {
       if (localStorage.getItem("farsign-privateKey-" + clientName) == null) {
         const keyGenerationForUser = await generateKeyPair()
-        console.log("zizi")
 
         localStorage.setItem("farsign-privateKey-" + clientName, JSON.stringify(keyGenerationForUser.privateKey))
         setKeyGen(keyGenerationForUser)
