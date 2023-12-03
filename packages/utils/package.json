@@ -1,6 +1,6 @@
 {
   "name": "@farsign/utils",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "description": "The code that contains the authentification logic used in the @farsign/hook package.",
