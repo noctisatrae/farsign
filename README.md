@@ -12,4 +12,4 @@ This monorepo contains two packages: `@farsign/hooks` and `@farsign/utils` - the
 npm i @farsign/hooks
 ```
 
-Then you can read the [documentation](https://github.com/noctisatrae/farsign/blob/master/packages/hooks/docs.md) & play with [our example](https://github.com/noctisatrae/farsign/blob/master/example/src/App.tsx)! If you have any problems, feel free to create an issue!
+You should really check the [documentation](https://github.com/noctisatrae/farsign/blob/master/packages/hooks/docs.md) to get an overview of what you have to provide & prepare to make an app on Farcaster. After that, you can play with [our example](https://github.com/noctisatrae/farsign/blob/master/example/src/App.tsx)! If you have any problems, feel free to create an issue!

@@ -1,20 +1,25 @@
 import './App.css'
-import { useCheckSigner, useToken, useSigner, useEncryptedSigner, keyGeneration } from "@farsign/hooks";
+import { useCheckSigner, useToken, useSigner, useKeypair, RequestSignatureParameters } from "@farsign/hooks";
 import { makeCastAdd, getHubRpcClient, FarcasterNetwork } from "@farcaster/hub-web";
 import QRCode from "react-qr-code";
-import { useEffect } from 'react';
+import { useEffect} from 'react';
 
-const CLIENT_NAME = "Example"
-const keys: keyGeneration = {
-  publicKey: [], //UINT8ARRAY
-  privateKey: [],
-  key: ""
+const CLIENT_NAME = "";
+const APP_FID = 10626;
+const MNEMONIC = "";
+const HUB = "";
+const DEADLINE = Math.floor(Date.now() / 1000) + 86400;// signature is valid for 1 day you might want to extend this
+
+const params: RequestSignatureParameters = {
+  appFid: APP_FID,
+  appMnemonic: MNEMONIC,
+  deadline: DEADLINE,
+  name: CLIENT_NAME
 }
-const mnemonic = "";
 
 const sendCast = async (encryptedSigner: any) => {
-  const castBody = ":) !";
-  const hub = getHubRpcClient("https://834f9d.hubs-web.neynar.com:2285");
+  const castBody = "Getting closer and closer to something clean with my project tonight!";
+  const hub = getHubRpcClient(HUB);
   
   const request = JSON.parse(localStorage.getItem("farsign-" + CLIENT_NAME)!);
   
@@ -30,10 +35,10 @@ const sendCast = async (encryptedSigner: any) => {
 }
 
 function App() {
+  const [keys, encryptedSigner] = useKeypair(CLIENT_NAME);
   const [isConnected, setIsConnected] = useCheckSigner(CLIENT_NAME);
-  const [token] = useToken(CLIENT_NAME, 10626, mnemonic, keys);
+  const [token] = useToken(CLIENT_NAME, params, keys!);
   const [signer] = useSigner(CLIENT_NAME, token);
-  const [encryptedSigner] = useEncryptedSigner(CLIENT_NAME);
 
   useEffect(() => {
     if (typeof signer?.signerRequest == 'object') {

@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { generateKeyPair, requestSignerAuthStatus, sendPublicKey, keyGeneration } from "@farsign/utils";
-import { NobleEd25519Signer } from "@farcaster/hub-web";
+import { generateKeyPair, requestSignerAuthStatus, sendPublicKey, KeyGeneration, RequestSignatureParameters } from "@farsign/utils";
+import { NobleEd25519Signer, ed25519 } from "@farcaster/hub-web";
 import { SignedKeyRequest } from "./SignerAuthStatus";
+import { Buffer } from "buffer";
 
 type Token = {
   token: string,
@@ -17,7 +18,41 @@ type Signer = {
   signerRequest: SignedKeyRequest|boolean,
 }
 
-const useToken = (clientName: string, fid: number, appMnemonic: string, keys: keyGeneration) => {
+const useKeypair = (clientName: string) => {
+  const [keygen, setKeyGen] = useState<KeyGeneration>();
+  const [encryptedSigner, setEncyptedSigner] = useState<NobleEd25519Signer>();
+
+  useEffect(() => {
+    (async () => {
+      if (localStorage.getItem("farsign-privateKey-" + clientName) == null) {
+        const keyGenerationForUser = await generateKeyPair()
+        console.log("zizi")
+
+        localStorage.setItem("farsign-privateKey-" + clientName, JSON.stringify(keyGenerationForUser.privateKey))
+        setKeyGen(keyGenerationForUser)
+      }
+      else {
+        const privateKey = localStorage.getItem("farsign-privateKey-" + clientName);
+        const parsedPrivateKey = Uint8Array.from(privateKey!.split(",").map(split => Number(split)))
+        
+        const reconstitutionOfPublicKey = (await ed25519.getPublicKey(parsedPrivateKey))._unsafeUnwrap();
+
+        const reconstitutionOfKeypair: KeyGeneration = {
+          privateKey: parsedPrivateKey,
+          publicKey: reconstitutionOfPublicKey,
+          key: `0x${Buffer.from(reconstitutionOfPublicKey).toString("hex")}`
+        }
+
+        setEncyptedSigner(new NobleEd25519Signer(parsedPrivateKey))
+        setKeyGen(reconstitutionOfKeypair)
+      }
+    })();
+  }, [])
+
+  return [keygen, encryptedSigner] as const;
+}
+
+const useToken = (clientName: string, parameters: RequestSignatureParameters, keypair: KeyGeneration) => {
   const [fetchedToken, setFetchedToken] = useState<Token>({
     token: "",
     deepLink: ""
@@ -25,20 +60,22 @@ const useToken = (clientName: string, fid: number, appMnemonic: string, keys: ke
 
   useEffect(() => {
     (async () => {      
-      if (localStorage.getItem("farsign-signer-" + clientName) != null) {
-        setFetchedToken({
-          token: "already connected",
-          deepLink: "already connected"
-        })
-      } else {
-        const {token, deeplinkUrl} = await sendPublicKey(keys, clientName, fid, appMnemonic);
-
-        localStorage.setItem("farsign-privateKey-" + clientName, keys.privateKey.toString())
-
-        setFetchedToken({ token: token, deepLink: deeplinkUrl })
+      if (keypair !== undefined) {
+        if (localStorage.getItem("farsign-signer-" + clientName) != null) {
+          setFetchedToken({
+            token: "already connected",
+            deepLink: "already connected"
+          })
+        } else {
+          const {token, deeplinkUrl} = await sendPublicKey(parameters, keypair);
+  
+          localStorage.setItem("farsign-privateKey-" + clientName, keypair.privateKey.toString())
+  
+          setFetchedToken({ token: token, deepLink: deeplinkUrl })
+        }
       }
     })();
-  }, []);
+  }, [keypair]);
 
   return [fetchedToken, setFetchedToken] as const
 }
@@ -55,7 +92,6 @@ const useSigner = (clientName: string, token: Token) => {
   useEffect(() => {
     (async () => {
       const isAlreadyConnectedCheck = isAlreadyConnected(clientName);
-      console.log(token, isAlreadyConnectedCheck)
       if (token.token.length > 0 && typeof isAlreadyConnectedCheck == 'boolean') {
         while (true) {
           await new Promise(resolve => setTimeout(resolve, 4000));
@@ -97,20 +133,5 @@ const useCheckSigner = (clientName: string) => {
   return [isConnected, setIsConnected] as const;
 }
 
-const useEncryptedSigner = (clientName: string) => {
-  const [encryptedSigner, setEncryptedSigner] = useState<NobleEd25519Signer>()
-
-  useEffect(() => {
-    if (localStorage.getItem(`farsign-${clientName}`) != null) {
-      const privateKey = localStorage.getItem("farsign-privateKey-" + clientName)!;
-
-      const privateKey_encoded = Uint8Array.from(privateKey.split(",").map(split => Number(split)))
-      setEncryptedSigner(new NobleEd25519Signer(privateKey_encoded));
-    }
-  }, [])
-
-  return [encryptedSigner, setEncryptedSigner] as const;
-}
-
-export { useSigner, useToken, useCheckSigner, useEncryptedSigner, SignedKeyRequest, generateKeyPair, keyGeneration };
+export { useSigner, useToken, useCheckSigner, useKeypair, SignedKeyRequest, generateKeyPair, KeyGeneration, RequestSignatureParameters };
 export type { Token, Signer, Keypair };
